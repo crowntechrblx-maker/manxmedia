@@ -1,7 +1,0 @@
-User-agent: *
-Allow: /
-
-# Private Administration Subcategory crawler exclusions
-Disallow: /admin
-
-Sitemap: https://jacobcrowephotography.com/sitemap.xml
