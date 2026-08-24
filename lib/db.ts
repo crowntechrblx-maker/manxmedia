@@ -8,7 +8,7 @@
  * moving persistence from "nowhere" (the endpoints didn't exist on Vercel)
  * to a real Postgres database.
  */
-import { getSupabaseAdmin } from './supabaseAdmin';
+import { getSupabaseAdmin } from './supabaseAdmin.js';
 
 export interface DBData {
   photos: any[];

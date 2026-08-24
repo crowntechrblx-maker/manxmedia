@@ -2,7 +2,7 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
  */
-import { getSupabaseAdmin, PHOTOS_BUCKET } from './supabaseAdmin';
+import { getSupabaseAdmin, PHOTOS_BUCKET } from './supabaseAdmin.js';
 
 export async function createUploadUrl(filename: string): Promise<{ token: string; downloadUrl: string; path: string }> {
   const supabase = getSupabaseAdmin();
