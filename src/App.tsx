@@ -151,6 +151,7 @@ export default function App() {
 
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const batchFileInputRef = useRef<HTMLInputElement>(null);
 
   // Folder Gallery state
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
@@ -624,6 +625,8 @@ export default function App() {
     if (e.target.files && e.target.files.length > 0) {
       processFiles(Array.from(e.target.files));
     }
+    // Reset so selecting the same file (or another one right after) always fires onChange again.
+    e.target.value = '';
   };
 
   // Automatic Watermarking and Compression Engine
@@ -841,6 +844,7 @@ export default function App() {
       // Reset forms
       setSelectedFile(null);
       setUploadPreview(null);
+      if (fileInputRef.current) fileInputRef.current.value = '';
       setUploadForm(prev => ({
         ...prev,
         title: '',
@@ -973,6 +977,7 @@ export default function App() {
       // Reset dump-specific forms
       setBatchFiles([]);
       setBatchPreviews([]);
+      if (batchFileInputRef.current) batchFileInputRef.current.value = '';
       setDumpTitlePrefix('');
       setDumpDescription('');
       setDumpIsFeatured(false);
@@ -2393,7 +2398,7 @@ export default function App() {
                                     />
                                     <button
                                       type="button"
-                                      onClick={() => { setSelectedFile(null); setUploadPreview(null); }}
+                                      onClick={() => { setSelectedFile(null); setUploadPreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
                                       className="absolute top-4 right-4 bg-rose-500 hover:bg-rose-600 cursor-pointer p-2 rounded-full text-white shadow-xl focus:outline-none transition-colors"
                                       title="Remove image"
                                     >
@@ -2656,9 +2661,8 @@ export default function App() {
                                   onDragLeave={handleDrag}
                                   onDrop={handleDrop}
                                   onClick={() => {
-                                    if (fileInputRef.current) {
-                                      fileInputRef.current.multiple = true;
-                                      fileInputRef.current.click();
+                                    if (batchFileInputRef.current) {
+                                      batchFileInputRef.current.click();
                                     }
                                   }}
                                   className={`aspect-video max-h-52 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center p-6 text-center cursor-pointer transition-all ${dragActive ? 'border-blue-500 bg-blue-500/5' : darkMode ? 'border-slate-800 bg-slate-950/40 hover:border-slate-705' : 'border-slate-300 bg-slate-50 hover:border-slate-400'}`}
@@ -2667,7 +2671,7 @@ export default function App() {
                                   <h5 className="font-extrabold text-sm uppercase tracking-wide text-slate-705 dark:text-slate-300">Drop Multi-Files / Folder Contents</h5>
                                   <p className="text-2xs text-slate-500 uppercase tracking-widest mt-1">Accepts multiple .jpg, .png, .webp image selections</p>
                                   <input 
-                                    ref={fileInputRef}
+                                    ref={batchFileInputRef}
                                     type="file" 
                                     accept="image/*"
                                     multiple
@@ -2683,7 +2687,7 @@ export default function App() {
                                       <span>Queue Batch Preview</span>
                                       <button 
                                         type="button" 
-                                        onClick={() => { setBatchFiles([]); setBatchPreviews([]); }}
+                                        onClick={() => { setBatchFiles([]); setBatchPreviews([]); if (batchFileInputRef.current) batchFileInputRef.current.value = ''; }}
                                         className="text-rose-500 hover:text-rose-455 text-[9px] font-black tracking-widest uppercase cursor-pointer"
                                       >
                                         Clear All
