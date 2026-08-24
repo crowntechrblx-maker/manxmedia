@@ -68,6 +68,8 @@ const itemVariants = {
   }
 };
 
+import jacobPortrait from "./assets/images/jacob.jpg";
+
 export default function App() {
   // DB States
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -1896,6 +1898,7 @@ export default function App() {
           </section>
         )}
 
+        
         {/* =============================================================== */}
         {/* TAB 3: ABOUT JACOB CROWE */}
         {/* =============================================================== */}
@@ -1916,11 +1919,10 @@ export default function App() {
                     referrerPolicy="no-referrer"
                   />
                 ) : photos[0]?.imageUrl ? (
-                  <img 
-                    src={photos[0].imageUrl} 
+                  <img
+                    src={jacobPortrait}
                     alt="Jacob Crowe Portrait"
                     className="w-full aspect-[4/5] object-cover rounded-xl shadow-2xl relative z-10 border border-slate-200 dark:border-slate-800"
-                    referrerPolicy="no-referrer"
                   />
                 ) : (
                   <div className="w-full aspect-[4/5] rounded-xl shadow-2xl relative z-10 border border-slate-300 dark:border-slate-800 bg-slate-100 dark:bg-slate-900/60 flex flex-col items-center justify-center gap-3">
@@ -1946,13 +1948,13 @@ export default function App() {
 
                 <div className={`space-y-4 text-sm md:text-base leading-relaxed ${darkMode ? 'text-slate-300' : 'text-slate-650'}`}>
                   <p>
-                    I am Jacob Crowe, a professional cinematographer and photographer specializing in severe landscapes, dark atmospheric frames, and high-end automotive media. Drawing heavy visual inspiration from the coastal tempests of the Isle of Man, my compositions aim to convey mood, solitude, and structure.
+                    I’m Jacob Crowe, an all-round photographer with a passion for capturing landscapes, automotive moments, and atmospheric scenes. Photography is a hobby and creative outlet for me, with much of my work shared across social media. Inspired by the landscapes and character of the Isle of Man, I aim to create images that capture a sense of place, mood, and atmosphere.
                   </p>
                   <p>
-                    Under the brand <strong className="text-blue-600 dark:text-sky-400 font-extrabold">Manx Media</strong>, I create multimedia content documenting cinematic equipment, short films, behind-the-scenes editing techniques, and location guides. This channel has grown a dedicated following on TikTok, connecting with filmmakers and car enthusiasts globally who look for structured storytelling.
+                    Under the brand <strong className="text-blue-600 dark:text-sky-400 font-extrabold">Manx Media</strong>, I create and share a range of photography and multimedia content across social media, including landscapes, automotive photography, locations, and behind-the-scenes moments. My content is focused on showcasing my work, experimenting with different styles, and sharing the places and subjects that inspire me.
                   </p>
                   <p>
-                    This secure portal is my private channel to cleanly append, update, or reorganize galleries dynamically. It ensures that when clients visit they always see my latest, highest-fidelity captures without technical overhead.
+                    This private portal gives me a simple way to manage, update, and organise my photography galleries. It allows me to keep my latest work available in one place, making it easy to showcase new captures without unnecessary technical complexity.
                   </p>
                 </div>
 
