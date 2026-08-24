@@ -844,6 +844,8 @@ export default function App() {
       // Reset forms
       setSelectedFile(null);
       setUploadPreview(null);
+      setBatchFiles([]);
+      setBatchPreviews([]);
       if (fileInputRef.current) fileInputRef.current.value = '';
       setUploadForm(prev => ({
         ...prev,
@@ -2398,7 +2400,7 @@ export default function App() {
                                     />
                                     <button
                                       type="button"
-                                      onClick={() => { setSelectedFile(null); setUploadPreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                                      onClick={() => { setSelectedFile(null); setUploadPreview(null); setBatchFiles([]); setBatchPreviews([]); if (fileInputRef.current) fileInputRef.current.value = ''; }}
                                       className="absolute top-4 right-4 bg-rose-500 hover:bg-rose-600 cursor-pointer p-2 rounded-full text-white shadow-xl focus:outline-none transition-colors"
                                       title="Remove image"
                                     >
