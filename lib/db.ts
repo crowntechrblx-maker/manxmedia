@@ -14,6 +14,7 @@ export interface DBData {
   photos: any[];
   categories: any[];
   messages: any[];
+  aboutPhotoUrl?: string | null;
 }
 
 export const DEFAULT_DB: DBData = {
@@ -25,6 +26,7 @@ export const DEFAULT_DB: DBData = {
     { id: 'cat_4', name: 'Commercial', order: 4 },
   ],
   messages: [],
+  aboutPhotoUrl: null,
 };
 
 const ROW_ID = 1;
@@ -52,6 +54,7 @@ export async function loadDB(): Promise<DBData> {
     photos: blob.photos ?? [],
     categories: blob.categories ?? DEFAULT_DB.categories,
     messages: blob.messages ?? [],
+    aboutPhotoUrl: blob.aboutPhotoUrl ?? null,
   };
 }
 
@@ -72,5 +75,6 @@ export function toPublicDB(db: DBData): DBData {
     photos: db.photos.filter((p) => p.isPublished),
     categories: db.categories,
     messages: [], // contact messages are write-only for the public
+    aboutPhotoUrl: db.aboutPhotoUrl ?? null,
   };
 }

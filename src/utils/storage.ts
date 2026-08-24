@@ -47,6 +47,7 @@ class StorageManager {
   private cachedPhotos: Photo[] = [];
   private cachedCategories: Category[] = [];
   private cachedMessages: ContactSubmission[] = [];
+  private cachedAboutPhotoUrl: string | null = null;
 
   async init(): Promise<void> {
     try {
@@ -56,12 +57,18 @@ class StorageManager {
         this.cachedPhotos = data.photos || [];
         this.cachedCategories = data.categories?.length ? data.categories : this.getDefaultCategoriesFallback();
         this.cachedMessages = data.messages || [];
+        this.cachedAboutPhotoUrl = data.aboutPhotoUrl ?? null;
 
         // Fast browser cache purely for snappy reloads — the server is the source of truth.
         localStorage.setItem('manx_cached_photos_admin', JSON.stringify(this.cachedPhotos));
         localStorage.setItem('manx_cached_photos_public', JSON.stringify(this.cachedPhotos.filter(p => p.isPublished)));
         localStorage.setItem('manx_cached_categories', JSON.stringify(this.cachedCategories));
         localStorage.setItem('manx_cached_messages', JSON.stringify(this.cachedMessages));
+        if (this.cachedAboutPhotoUrl) {
+          localStorage.setItem('manx_cached_about_photo', this.cachedAboutPhotoUrl);
+        } else {
+          localStorage.removeItem('manx_cached_about_photo');
+        }
         this.isLocalMode = false;
         return;
       }
@@ -98,6 +105,8 @@ class StorageManager {
         this.cachedMessages = [];
       }
     }
+
+    this.cachedAboutPhotoUrl = localStorage.getItem('manx_cached_about_photo');
   }
 
   getDefaultCategoriesFallback(): Category[] {
@@ -238,6 +247,22 @@ class StorageManager {
     await this.syncToBackend();
   }
 
+  // ABOUT PAGE PORTRAIT PHOTO
+  getAboutPhoto(): string | null {
+    return this.cachedAboutPhotoUrl;
+  }
+
+  /** Admin only. */
+  async saveAboutPhoto(url: string | null): Promise<void> {
+    this.cachedAboutPhotoUrl = url;
+    if (url) {
+      localStorage.setItem('manx_cached_about_photo', url);
+    } else {
+      localStorage.removeItem('manx_cached_about_photo');
+    }
+    await this.syncToBackend();
+  }
+
   // Full-state sync — admin actions only (server rejects this without a valid session cookie).
   private async syncToBackend(): Promise<void> {
     try {
@@ -248,7 +273,8 @@ class StorageManager {
         body: JSON.stringify({
           photos: this.cachedPhotos,
           categories: this.cachedCategories,
-          messages: this.cachedMessages
+          messages: this.cachedMessages,
+          aboutPhotoUrl: this.cachedAboutPhotoUrl
         })
       });
       if (!res.ok) {

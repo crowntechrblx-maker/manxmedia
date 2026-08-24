@@ -73,6 +73,7 @@ import jacobPortrait from "./assets/images/jacob.jpg";
 export default function App() {
   // DB States
   const [photos, setPhotos] = useState<Photo[]>([]);
+  const [aboutPhotoUrl, setAboutPhotoUrl] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [messages, setMessages] = useState<ContactSubmission[]>([]);
   const [dbReady, setDbReady] = useState(false);
@@ -154,6 +155,8 @@ export default function App() {
   // Refs
   const fileInputRef = useRef<HTMLInputElement>(null);
   const batchFileInputRef = useRef<HTMLInputElement>(null);
+  const aboutPhotoInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadingAboutPhoto, setIsUploadingAboutPhoto] = useState(false);
 
   // Folder Gallery state
   const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
@@ -228,6 +231,7 @@ export default function App() {
         
         setPhotos(loadedPhotos);
         setCategories(loadedCategories);
+        setAboutPhotoUrl(storage.getAboutPhoto());
         
         if (loadedCategories.length > 0) {
           setUploadForm(prev => ({ ...prev, category: loadedCategories[0].name }));
@@ -541,6 +545,7 @@ export default function App() {
         setPhotos(adminPhotos);
         const loadedMessages = await storage.getAllMessages();
         setMessages(loadedMessages);
+        setAboutPhotoUrl(storage.getAboutPhoto());
       } else {
         setPinError(data.error || 'Incorrect username or password.');
       }
@@ -564,6 +569,24 @@ export default function App() {
     // Reload public photos on logout
     const publicPhotos = await storage.getAllPhotos(false);
     setPhotos(publicPhotos);
+  };
+
+  const handleAboutPhotoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    setIsUploadingAboutPhoto(true);
+    try {
+      const downloadUrl = await storage.uploadImage(file, file.name);
+      await storage.saveAboutPhoto(downloadUrl);
+      setAboutPhotoUrl(downloadUrl);
+    } catch (err) {
+      console.error('About photo upload failed:', err);
+      alert('Failed to upload the photo. Please try again.');
+    } finally {
+      setIsUploadingAboutPhoto(false);
+    }
   };
 
   // Drag and Drop files functions
@@ -1910,25 +1933,46 @@ export default function App() {
               <div className="md:col-span-5 relative" id="about-photo-wrapper">
                 <div className="absolute -top-4 -left-4 w-24 h-24 border-t-2 border-l-2 border-blue-500/40 dark:border-sky-500/30 rounded-tl-xl" />
                 <div className="absolute -bottom-4 -right-4 w-24 h-24 border-b-2 border-r-2 border-blue-500/40 dark:border-sky-500/30 rounded-br-xl" />
-                
-                {photos[2]?.imageUrl ? (
-                  <img 
-                    src={photos[2].imageUrl} 
+
+                {aboutPhotoUrl ? (
+                  <img
+                    src={aboutPhotoUrl}
                     alt="Jacob Crowe Portrait"
                     className="w-full aspect-[4/5] object-cover rounded-xl shadow-2xl relative z-10 border border-slate-200 dark:border-slate-800"
                     referrerPolicy="no-referrer"
                   />
-                ) : photos[0]?.imageUrl ? (
+                ) : (
                   <img
                     src={jacobPortrait}
                     alt="Jacob Crowe Portrait"
                     className="w-full aspect-[4/5] object-cover rounded-xl shadow-2xl relative z-10 border border-slate-200 dark:border-slate-800"
                   />
-                ) : (
-                  <div className="w-full aspect-[4/5] rounded-xl shadow-2xl relative z-10 border border-slate-300 dark:border-slate-800 bg-slate-100 dark:bg-slate-900/60 flex flex-col items-center justify-center gap-3">
-                    <Camera className="w-12 h-12 text-blue-500/40 dark:text-sky-500/30 animate-pulse" />
-                    <span className="text-[10px] font-black uppercase tracking-widest text-slate-400 dark:text-slate-500">No portrait uploaded</span>
-                  </div>
+                )}
+
+                {isAdminLoggedIn && (
+                  <>
+                    <input
+                      ref={aboutPhotoInputRef}
+                      type="file"
+                      accept="image/*"
+                      onChange={handleAboutPhotoChange}
+                      className="hidden"
+                    />
+                    <button
+                      onClick={() => aboutPhotoInputRef.current?.click()}
+                      disabled={isUploadingAboutPhoto}
+                      className="absolute z-20 bottom-3 right-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-60 text-white text-xs font-bold uppercase tracking-wider shadow-lg transition-colors"
+                    >
+                      {isUploadingAboutPhoto ? (
+                        <>Uploading...</>
+                      ) : (
+                        <>
+                          <Camera className="w-3.5 h-3.5" />
+                          Replace Photo
+                        </>
+                      )}
+                    </button>
+                  </>
                 )}
               </div>
 
@@ -1965,7 +2009,7 @@ export default function App() {
                   </h4>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <a 
-                      href="https://www.tiktok.com" 
+                      href="https://www.tiktok.com/@officialmanxmedia" 
                       target="_blank" 
                       rel="noopener noreferrer"
                       className={`flex items-center justify-between p-4 rounded-xl border group transition-all cursor-pointer ${darkMode ? 'border-slate-800 bg-slate-905 hover:bg-slate-900 hover:border-slate-700' : 'border-slate-200 bg-slate-50 hover:bg-white hover:border-blue-500 hover:shadow-md'}`}
@@ -1976,7 +2020,7 @@ export default function App() {
                         </div>
                         <div className="text-left">
                           <p className="text-xs text-slate-505 font-semibold uppercase tracking-wider">TikTok</p>
-                          <p className="text-sm font-bold tracking-wide uppercase">@ManxMedia</p>
+                          <p className="text-sm font-bold tracking-wide uppercase">@officialmanxmedia</p>
                         </div>
                       </div>
                       <ExternalLink className="w-4 h-4 text-slate-400 group-hover:text-blue-500 transition-colors" />
