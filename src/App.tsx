@@ -649,8 +649,8 @@ export default function App() {
       img.src = base64Str;
       img.onload = () => {
         const canvas = document.createElement('canvas');
-        const MAX_WIDTH = 1200;
-        const MAX_HEIGHT = 1200;
+        const MAX_WIDTH = 2400;
+        const MAX_HEIGHT = 2400;
         let width = img.width;
         let height = img.height;
 
@@ -717,7 +717,7 @@ export default function App() {
 
           const finishWatermark = () => {
              ctx.restore();
-             resolve(canvas.toDataURL('image/jpeg', 0.85));
+             resolve(canvas.toDataURL('image/jpeg', 0.92));
           };
 
           if (wmConfig.logoStyle === 'custom-image' && wmConfig.customLogoBase64) {
@@ -747,7 +747,7 @@ export default function App() {
 
           finishWatermark();
         } else {
-          const optimizedURI = canvas.toDataURL('image/jpeg', 0.82);
+          const optimizedURI = canvas.toDataURL('image/jpeg', 0.92);
           resolve(optimizedURI);
         }
       };
