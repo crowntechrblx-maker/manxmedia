@@ -1,5 +1,5 @@
-import { checkCredentials, createSessionCookie } from '../lib/auth';
-import { readJsonBody } from '../lib/readJsonBody';
+import { checkCredentials, createSessionCookie } from '../lib/auth.js';
+import { readJsonBody } from '../lib/readJsonBody.js';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');

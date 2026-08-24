@@ -1,5 +1,5 @@
-import { createUploadUrl } from '../lib/photoStorage';
-import { isAdminRequest } from '../lib/auth';
+import { createUploadUrl } from '../lib/photoStorage.js';
+import { isAdminRequest } from '../lib/auth.js';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');

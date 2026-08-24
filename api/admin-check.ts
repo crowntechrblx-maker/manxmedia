@@ -1,4 +1,4 @@
-import { isAdminRequest } from '../lib/auth';
+import { isAdminRequest } from '../lib/auth.js';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');

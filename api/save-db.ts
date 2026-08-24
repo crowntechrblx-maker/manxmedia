@@ -1,6 +1,6 @@
-import { saveDB, DBData } from '../lib/db';
-import { isAdminRequest } from '../lib/auth';
-import { readJsonBody } from '../lib/readJsonBody';
+import { saveDB, DBData } from '../lib/db.js';
+import { isAdminRequest } from '../lib/auth.js';
+import { readJsonBody } from '../lib/readJsonBody.js';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');

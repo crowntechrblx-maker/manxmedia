@@ -1,6 +1,6 @@
-import { deleteFileByUrl } from '../lib/photoStorage';
-import { isAdminRequest } from '../lib/auth';
-import { readJsonBody } from '../lib/readJsonBody';
+import { deleteFileByUrl } from '../lib/photoStorage.js';
+import { isAdminRequest } from '../lib/auth.js';
+import { readJsonBody } from '../lib/readJsonBody.js';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');

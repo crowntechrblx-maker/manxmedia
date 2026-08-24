@@ -1,5 +1,5 @@
-import { loadDB, saveDB } from '../lib/db';
-import { readJsonBody } from '../lib/readJsonBody';
+import { loadDB, saveDB } from '../lib/db.js';
+import { readJsonBody } from '../lib/readJsonBody.js';
 
 /**
  * Public contact-form submission endpoint. Unlike /api/save-db (admin-only,

@@ -1,5 +1,5 @@
-import { loadDB, toPublicDB } from '../lib/db';
-import { isAdminRequest } from '../lib/auth';
+import { loadDB, toPublicDB } from '../lib/db.js';
+import { isAdminRequest } from '../lib/auth.js';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');

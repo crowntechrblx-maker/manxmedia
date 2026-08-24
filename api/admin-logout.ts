@@ -1,4 +1,4 @@
-import { createLogoutCookie } from '../lib/auth';
+import { createLogoutCookie } from '../lib/auth.js';
 
 export default async function handler(req: any, res: any) {
   res.setHeader('Access-Control-Allow-Origin', '*');
