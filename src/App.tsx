@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
+import { useLocation, useNavigate } from 'react-router-dom';
 import {
   Camera,
   Upload,
@@ -81,7 +82,22 @@ export default function App() {
 
   // Theme & Navigation
   const [darkMode, setDarkMode] = useState(true);
-  const [activeTab, setActiveTab ] = useState<'home' | 'gallery' | 'about' | 'contact' | 'admin'>('home');
+
+  // Real URL-based routing (/, /gallery, /about, /contact, /admin) instead of
+  // an in-memory tab flag — `activeTab`/`setActiveTab` keep the exact same
+  // shape as before so none of the render logic below needs to change.
+  type TabName = 'home' | 'gallery' | 'about' | 'contact' | 'admin';
+  const location = useLocation();
+  const navigate = useNavigate();
+  const pathToTab = (pathname: string): TabName => {
+    const seg = pathname.split('/')[1];
+    if (seg === 'gallery' || seg === 'about' || seg === 'contact' || seg === 'admin') return seg;
+    return 'home';
+  };
+  const activeTab = pathToTab(location.pathname);
+  const setActiveTab = (tab: TabName) => {
+    navigate(tab === 'home' ? '/' : `/${tab}`);
+  };
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Gallery Filters
@@ -1310,6 +1326,11 @@ export default function App() {
         };
     }
   }, [activeTab]);
+
+  // Scroll to top on every page navigation, like a normal multi-page site.
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   return (
     <div id="manx-media-app" className={`min-h-screen flex flex-col font-sans transition-colors duration-300 ${darkMode ? 'text-slate-100 bg-slate-950' : 'text-slate-950 bg-slate-50'}`}>
