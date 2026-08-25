@@ -5,7 +5,7 @@
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Helmet } from 'react-helmet-async';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
 import {
   Camera,
   Upload,
@@ -1348,11 +1348,11 @@ export default function App() {
         <div className="max-w-7xl mx-auto px-6 py-5 flex items-center justify-between">
           
           {/* Logo with Integrated Vector Shutter Badge */}
-          <div 
-            onClick={() => { setActiveTab('home'); setMobileMenuOpen(false); }} 
+          <Link 
+            to="/"
+            onClick={() => setMobileMenuOpen(false)} 
             className="cursor-pointer group flex items-center gap-3.5 focus:outline-none select-none"
             id="brand-logo"
-            tabIndex={0}
           >
             <img
               src={mainLogo} 
@@ -1367,44 +1367,44 @@ export default function App() {
                 Photography by Jacob Crowe
               </p>
             </div>
-          </div>
+          </Link>
 
           {/* Desktop Controls Navbar */}
           <nav className="hidden md:flex items-center space-x-8 text-sm font-semibold tracking-wider uppercase">
-            <button 
-              onClick={() => setActiveTab('home')} 
+            <Link 
+              to="/"
               className={`pb-1 hover:text-blue-500 dark:hover:text-sky-400 transition-colors border-b-2 ${activeTab === 'home' ? 'text-blue-500 dark:text-sky-400 border-blue-550 dark:border-sky-400' : 'border-transparent text-slate-500 dark:text-slate-400'}`}
               id="nav-home"
             >
               Home
-            </button>
-            <button 
-              onClick={() => setActiveTab('gallery')} 
+            </Link>
+            <Link 
+              to="/gallery"
               className={`pb-1 hover:text-blue-500 dark:hover:text-sky-400 transition-colors border-b-2 ${activeTab === 'gallery' ? 'text-blue-500 dark:text-sky-400 border-blue-550 dark:border-sky-400' : 'border-transparent text-slate-500 dark:text-slate-400'}`}
               id="nav-gallery"
             >
               Gallery
-            </button>
-            <button 
-              onClick={() => setActiveTab('about')} 
+            </Link>
+            <Link 
+              to="/about"
               className={`pb-1 hover:text-blue-500 dark:hover:text-sky-400 transition-colors border-b-2 ${activeTab === 'about' ? 'text-blue-500 dark:text-sky-400 border-blue-550 dark:border-sky-400' : 'border-transparent text-slate-500 dark:text-slate-400'}`}
               id="nav-about"
             >
               About
-            </button>
-            <button 
-              onClick={() => setActiveTab('contact')} 
+            </Link>
+            <Link 
+              to="/contact"
               className={`pb-1 hover:text-blue-500 dark:hover:text-sky-400 transition-colors border-b-2 ${activeTab === 'contact' ? 'text-blue-500 dark:text-sky-400 border-blue-550 dark:border-sky-400' : 'border-transparent text-slate-500 dark:text-slate-400'}`}
               id="nav-contact"
             >
               Contact
-            </button>
+            </Link>
             
             <span className={`h-4 w-px ${darkMode ? 'bg-slate-800' : 'bg-slate-300'}`} />
 
             {/* Admin trigger */}
-            <button 
-              onClick={() => setActiveTab('admin')} 
+            <Link 
+              to="/admin"
               className={`hover:text-blue-500 dark:hover:text-sky-400 flex items-center gap-1.5 focus:outline-none transition-all py-1.5 px-3.5 rounded-full text-[11px] font-bold ${activeTab === 'admin' ? 'bg-blue-500/10 text-blue-550 dark:text-sky-400 font-extrabold border-blue-500/30' : 'bg-transparent border border-slate-300 dark:border-slate-800'}`}
               id="nav-admin-gate"
               title="Admin CMS Gate"
@@ -1420,7 +1420,7 @@ export default function App() {
                   <span>Admin</span>
                 </>
               )}
-            </button>
+            </Link>
 
             {/* Dark & Light Theme Switch */}
             <button 
@@ -1456,33 +1456,38 @@ export default function App() {
         {/* Mobile dropdown menu body */}
         {mobileMenuOpen && (
           <div className={`md:hidden border-t py-4 px-6 absolute left-0 right-0 shadow-lg ${darkMode ? 'bg-slate-900/95 border-slate-800' : 'bg-white/95 border-slate-200'} transition-all flex flex-col space-y-4 font-semibold text-sm uppercase tracking-wide z-50`} id="mobile-menu-body">
-            <button 
-              onClick={() => { setActiveTab('home'); setMobileMenuOpen(false); }} 
+            <Link 
+              to="/"
+              onClick={() => setMobileMenuOpen(false)} 
               className={`text-left py-2 hover:text-blue-500 dark:hover:text-sky-400 ${activeTab === 'home' ? 'text-blue-500 dark:text-sky-400 pl-2 border-l-2 border-blue-500 dark:border-sky-400' : 'text-slate-400'}`}
             >
               Home
-            </button>
-            <button 
-              onClick={() => { setActiveTab('gallery'); setMobileMenuOpen(false); }} 
+            </Link>
+            <Link 
+              to="/gallery"
+              onClick={() => setMobileMenuOpen(false)} 
               className={`text-left py-2 hover:text-blue-500 dark:hover:text-sky-400 ${activeTab === 'gallery' ? 'text-blue-500 dark:text-sky-400 pl-2 border-l-2 border-blue-500 dark:border-sky-400' : 'text-slate-400'}`}
             >
               Gallery
-            </button>
-            <button 
-              onClick={() => { setActiveTab('about'); setMobileMenuOpen(false); }} 
+            </Link>
+            <Link 
+              to="/about"
+              onClick={() => setMobileMenuOpen(false)} 
               className={`text-left py-2 hover:text-blue-500 dark:hover:text-sky-400 ${activeTab === 'about' ? 'text-blue-500 dark:text-sky-400 pl-2 border-l-2 border-blue-500 dark:border-sky-400' : 'text-slate-400'}`}
             >
               About
-            </button>
-            <button 
-              onClick={() => { setActiveTab('contact'); setMobileMenuOpen(false); }} 
+            </Link>
+            <Link 
+              to="/contact"
+              onClick={() => setMobileMenuOpen(false)} 
               className={`text-left py-2 hover:text-blue-500 dark:hover:text-sky-400 ${activeTab === 'contact' ? 'text-blue-500 dark:text-sky-400 pl-2 border-l-2 border-blue-500 dark:border-sky-400' : 'text-slate-400'}`}
             >
               Contact
-            </button>
+            </Link>
             <div className={`h-px w-full ${darkMode ? 'bg-slate-800' : 'bg-slate-200'}`} />
-            <button 
-              onClick={() => { setActiveTab('admin'); setMobileMenuOpen(false); }} 
+            <Link 
+              to="/admin"
+              onClick={() => setMobileMenuOpen(false)} 
               className={`text-left py-2 flex items-center gap-2 hover:text-blue-500 dark:hover:text-sky-400 ${activeTab === 'admin' ? 'text-blue-500 dark:text-sky-400 font-extrabold' : 'text-slate-400'}`}
             >
               {isAdminLoggedIn ? (
@@ -1496,7 +1501,7 @@ export default function App() {
                   <span>Admin Identity Login</span>
                 </>
               )}
-            </button>
+            </Link>
           </div>
         )}
       </header>
@@ -1540,20 +1545,20 @@ export default function App() {
                   "Exploring high-contrast compositions, moody weather narratives, and fine-art portraits along deep-cut coastlines."
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 w-full sm:w-auto">
-                  <button 
-                    onClick={() => setActiveTab('gallery')}
+                  <Link 
+                    to="/gallery"
                     className="group bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all font-bold tracking-widest text-xs uppercase text-white py-4 px-8 rounded-lg flex items-center justify-center gap-2.5 shadow-xl hover:-translate-y-0.5 cursor-pointer animate-none"
                     id="hero-explore-cta"
                   >
                     <span>Explore Gallery</span>
                     <ArrowRight className="w-4 h-4 group-hover:translate-x-1.5 transition-transform" />
-                  </button>
-                  <button 
-                    onClick={() => setActiveTab('contact')}
-                    className="border border-slate-300 hover:border-blue-500 hover:bg-slate-900/30 transition-all font-bold tracking-widest text-xs uppercase text-white py-4 px-8 rounded-lg hover:-translate-y-0.5 cursor-pointer"
+                  </Link>
+                  <Link 
+                    to="/contact"
+                    className="border border-slate-300 hover:border-blue-500 hover:bg-slate-900/30 transition-all font-bold tracking-widest text-xs uppercase text-white py-4 px-8 rounded-lg hover:-translate-y-0.5 cursor-pointer inline-flex items-center justify-center"
                   >
                     Get in touch
-                  </button>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -1591,13 +1596,13 @@ export default function App() {
                     Featured Photography
                   </h3>
                 </div>
-                <button 
-                  onClick={() => setActiveTab('gallery')}
+                <Link 
+                  to="/gallery"
                   className="text-blue-500 dark:text-sky-400 font-bold hover:text-blue-600 dark:hover:text-sky-350 text-sm tracking-widest uppercase flex items-center gap-2 mt-4 md:mt-0 transition-all cursor-pointer"
                 >
                   <span>View All Categories</span>
                   <ArrowRight className="w-4 h-4" />
-                </button>
+                </Link>
               </div>
 
               {/* Featured Cards Grid */}
@@ -4097,10 +4102,10 @@ export default function App() {
           {/* Quick links footer list */}
           <div className="md:col-span-3 flex flex-col space-y-2.5 text-xs text-left tracking-widest font-bold uppercase">
             <h5 className="text-[10px] tracking-[0.25em] text-slate-500 font-semibold mb-1">Portfolio Tabs</h5>
-            <button onClick={() => { setActiveTab('home'); }} className="hover:text-blue-600 dark:hover:text-sky-400 text-left cursor-pointer select-none">Home Splash</button>
-            <button onClick={() => { setActiveTab('gallery'); }} className="hover:text-blue-600 dark:hover:text-sky-400 text-left cursor-pointer select-none">Portfolio Grid</button>
-            <button onClick={() => { setActiveTab('about'); }} className="hover:text-blue-600 dark:hover:text-sky-400 text-left cursor-pointer select-none">Artist Story</button>
-            <button onClick={() => { setActiveTab('contact'); }} className="hover:text-blue-600 dark:hover:text-sky-400 text-left cursor-pointer select-none">Project Booking</button>
+            <Link to="/" className="hover:text-blue-600 dark:hover:text-sky-400 text-left cursor-pointer select-none">Home Splash</Link>
+            <Link to="/gallery" className="hover:text-blue-600 dark:hover:text-sky-400 text-left cursor-pointer select-none">Portfolio Grid</Link>
+            <Link to="/about" className="hover:text-blue-600 dark:hover:text-sky-400 text-left cursor-pointer select-none">Artist Story</Link>
+            <Link to="/contact" className="hover:text-blue-600 dark:hover:text-sky-400 text-left cursor-pointer select-none">Project Booking</Link>
           </div>
 
           {/* Copyright context */}
@@ -4112,13 +4117,13 @@ export default function App() {
               Structured via elegant design principles. Managed offline-first via sandboxed browser engines.
             </p>
             <div className="flex justify-start md:justify-end gap-3 pt-2">
-              <button 
-                onClick={() => setActiveTab('admin')}
+              <Link 
+                to="/admin"
                 className="hover:text-blue-600 dark:hover:text-sky-400 flex items-center gap-1.5 focus:outline-none text-[10px] tracking-widest font-bold uppercase transition bg-slate-100 hover:bg-slate-205 dark:bg-slate-900 dark:border-slate-800 border border-slate-200 py-1.5 px-3.5 rounded-full select-none text-slate-505 dark:text-slate-400 cursor-pointer"
               >
                 <Lock className="w-3 h-3 text-blue-600 dark:text-sky-450" />
                 <span>CMS Secure Access</span>
-              </button>
+              </Link>
             </div>
           </div>
 
