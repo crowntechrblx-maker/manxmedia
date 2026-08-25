@@ -4094,9 +4094,7 @@ export default function App() {
               MANX <span className="text-blue-600 dark:text-sky-400 font-extrabold">MEDIA</span>
             </h4>
             <p className="text-xs tracking-wider uppercase text-slate-500 font-bold mt-1">PHOTOGRAPHY PORTFOLIO BY JACOB CROWE</p>
-            <p className="text-xs leading-relaxed text-slate-400 mt-4 max-w-sm font-sans select-none">
-              High-contrast composition work, framing deep-cut geography, coastal weather, and high-fidelity automotive capture. Seeding visual weight to every digital medium.
-            </p>
+
           </div>
 
           {/* Quick links footer list */}
