@@ -43,6 +43,7 @@ import {
 } from 'lucide-react';
 import { storage, Photo, Category, ContactSubmission } from './utils/storage';
 import { motion } from 'motion/react';
+import { Analytics } from '@vercel/analytics/react';
 
 import mainLogo from './assets/images/mainlogo.png';
 
@@ -4128,6 +4129,7 @@ export default function App() {
         </div>
       </footer>
 
+      <Analytics />
     </div>
   );
 }
