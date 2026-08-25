@@ -993,11 +993,20 @@ export default function App() {
           updatedAt: new Date(Date.now() - i * 1000).toISOString()
         };
 
-        await storage.savePhoto(newPhoto);
         newlyAddedPhotos.push(newPhoto);
       }
 
-      // 3. Update states
+      // 3. One single write to the database for the whole batch (instead of
+      // one request per photo). Throws if it didn't actually save, so we can
+      // tell the user honestly rather than reporting false success.
+      setUploadProgress({
+        current: batchFiles.length,
+        total: batchFiles.length,
+        stage: `Saving ${newlyAddedPhotos.length} photo(s) to your gallery...`
+      });
+      await storage.savePhotosBulk(newlyAddedPhotos);
+
+      // 4. Update states
       setPhotos(prev => [...newlyAddedPhotos, ...prev]);
       setUploadSuccess(true);
 
@@ -1014,9 +1023,10 @@ export default function App() {
       setUploadForm(prev => ({ ...prev, category: activeCategory }));
 
       setTimeout(() => setUploadSuccess(false), 5000);
-    } catch (err) {
-      alert('Photo dump execution encountered storage exceptions. Some assets may be corrupted.');
-      console.error(err);
+    } catch (err: any) {
+      const detail = err?.message ? `\n\nDetails: ${err.message}` : '';
+      alert(`Upload failed — your photos were NOT saved to the gallery. Your selected files are still queued below, so you can try clicking Upload again.${detail}`);
+      console.error('Batch photo dump failed:', err);
     } finally {
       setIsUploading(false);
       setUploadProgress(null);

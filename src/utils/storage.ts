@@ -160,6 +160,30 @@ class StorageManager {
     await this.syncToBackend();
   }
 
+  /** Bulk-add multiple photos in ONE backend write (used by batch/dump uploads).
+   *  Throws on failure — unlike savePhoto(), this does not fail silently, so
+   *  callers can tell the user it didn't actually save. */
+  async savePhotosBulk(newPhotos: Photo[]): Promise<void> {
+    const now = new Date().toISOString();
+    for (const photo of newPhotos) {
+      const index = this.cachedPhotos.findIndex(p => p.id === photo.id);
+      const updatedPhoto = { ...photo, createdAt: photo.createdAt || now, updatedAt: now };
+      if (index === -1) {
+        this.cachedPhotos.push(updatedPhoto);
+      } else {
+        this.cachedPhotos[index] = updatedPhoto;
+      }
+    }
+    this.cachedPhotos.sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+    try {
+      localStorage.setItem('manx_cached_photos_admin', JSON.stringify(this.cachedPhotos));
+      localStorage.setItem('manx_cached_photos_public', JSON.stringify(this.cachedPhotos.filter(p => p.isPublished)));
+    } catch (e) {}
+
+    await this.syncToBackend(true); // throws on failure
+  }
+
   async deletePhoto(id: string): Promise<void> {
     const photoToDelete = this.cachedPhotos.find(p => p.id === id);
 
@@ -264,7 +288,9 @@ class StorageManager {
   }
 
   // Full-state sync — admin actions only (server rejects this without a valid session cookie).
-  private async syncToBackend(): Promise<void> {
+  // strict=true makes this throw on failure instead of only logging a warning, so callers
+  // that need to know whether the save actually happened (e.g. batch uploads) can react.
+  private async syncToBackend(strict: boolean = false): Promise<void> {
     try {
       const res = await fetch('/api/save-db', {
         method: 'POST',
@@ -279,10 +305,13 @@ class StorageManager {
       });
       if (!res.ok) {
         const err = await res.json().catch(() => ({}));
-        console.warn('StorageManager: Backend rejected sync:', err.error);
+        const message = err.error || `Server responded with ${res.status}`;
+        console.warn('StorageManager: Backend rejected sync:', message);
+        if (strict) throw new Error(message);
       }
     } catch (err) {
       console.warn('StorageManager: Failed to sync current state to server:', err);
+      if (strict) throw err instanceof Error ? err : new Error('Failed to sync to server');
     }
   }
 
