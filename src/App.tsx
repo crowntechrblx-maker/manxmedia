@@ -4112,7 +4112,7 @@ export default function App() {
               © {new Date().getFullYear()} Manx Media. All rights reserved.
             </p>
             <p className={`text-[10px] font-mono ${darkMode ? 'text-slate-650' : 'text-slate-400'}`}>
-              Structured via elegant design principles. Managed offline-first via sandboxed browser engines.
+              Website made by Jacob Crowe.
             </p>
             <div className="flex justify-start md:justify-end gap-3 pt-2">
               <Link 
