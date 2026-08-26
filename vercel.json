@@ -6,7 +6,7 @@
         {
           "type": "header",
           "key": "user-agent",
-          "value": ".*Discordbot.*"
+          "value": ".*(Discordbot|facebookexternalhit|Facebot|Twitterbot|Slackbot|LinkedInBot|WhatsApp|TelegramBot|Pinterest|redditbot|Googlebot|Bingbot|SkypeUriPreview|iMessage|Applebot|Threads|Bluesky).*"
         }
       ],
       "destination": "/api/og-gallery?id=:id"
