@@ -99,6 +99,17 @@ export default function App() {
   const setActiveTab = (tab: TabName) => {
     navigate(tab === 'home' ? '/' : `/${tab}`);
   };
+
+  // Individual photo permalinks: /gallery/:id. Parsed manually (rather than
+  // via useParams) since routing here is done by hand off location.pathname
+  // instead of <Routes>/<Route>. This id, when present, is the single
+  // source of truth for which photo the lightbox has open — see the sync
+  // effect below.
+  const photoIdFromUrl = useMemo(() => {
+    const parts = location.pathname.split('/').filter(Boolean);
+    if (parts[0] === 'gallery' && parts[1]) return decodeURIComponent(parts[1]);
+    return null;
+  }, [location.pathname]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Gallery Filters
@@ -410,16 +421,60 @@ export default function App() {
     return sorted;
   }, [photos, selectedPhotoCategory, selectedFolder, searchQuery, sortBy]);
 
+  // When a /gallery/:id URL is visited directly (or shared), make sure the
+  // full unfiltered photo list is active so the target photo is actually
+  // findable in activePhotos regardless of whatever filter was last set.
+  useEffect(() => {
+    if (!photoIdFromUrl) return;
+    setSelectedFolder(null);
+    setSelectedPhotoCategory('All');
+    setSearchQuery('');
+  }, [photoIdFromUrl]);
+
+  // The URL is the single source of truth for which photo (if any) the
+  // lightbox shows. This keeps direct links, browser back/forward, and the
+  // Share button all pointing at the same real, bookmarkable/shareable URL.
+  useEffect(() => {
+    if (!dbReady) return;
+    if (!photoIdFromUrl) {
+      setLightboxIndex(null);
+      return;
+    }
+    const idx = activePhotos.findIndex(p => p.id === photoIdFromUrl);
+    if (idx !== -1) {
+      setLightboxIndex(idx);
+    } else {
+      // Bad, old, or unpublished/deleted photo link — fall back to the grid
+      // instead of showing a broken lightbox.
+      navigate('/gallery', { replace: true });
+    }
+  }, [photoIdFromUrl, activePhotos, dbReady]);
+
+  const openLightboxForPhoto = (photoId: string) => {
+    navigate(`/gallery/${photoId}`);
+  };
+
+  const closeLightbox = () => {
+    setLightboxIndex(null);
+    if (photoIdFromUrl) {
+      navigate('/gallery', { replace: true });
+    }
+  };
+
   const handlePrevLightbox = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (lightboxIndex === null || activePhotos.length === 0) return;
-    setLightboxIndex(prev => (prev === 0 ? activePhotos.length - 1 : prev! - 1));
+    const prevIndex = lightboxIndex === 0 ? activePhotos.length - 1 : lightboxIndex - 1;
+    const prevPhoto = activePhotos[prevIndex];
+    if (prevPhoto) navigate(`/gallery/${prevPhoto.id}`, { replace: true });
   };
 
   const handleNextLightbox = (e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (lightboxIndex === null || activePhotos.length === 0) return;
-    setLightboxIndex(prev => (prev === activePhotos.length - 1 ? 0 : prev! + 1));
+    const nextIndex = lightboxIndex === activePhotos.length - 1 ? 0 : lightboxIndex + 1;
+    const nextPhoto = activePhotos[nextIndex];
+    if (nextPhoto) navigate(`/gallery/${nextPhoto.id}`, { replace: true });
   };
 
   const handleTouchStart = (e: React.TouchEvent) => {
@@ -474,11 +529,11 @@ export default function App() {
     }
   };
 
-  const handleShareLightboxImage = async (e: React.MouseEvent, imageUrl: string) => {
+  const handleShareLightboxImage = async (e: React.MouseEvent, photoId: string | undefined) => {
     e.stopPropagation();
-    if (!imageUrl) return;
+    if (!photoId) return;
     try {
-      const fullUrl = new URL(imageUrl, window.location.origin).toString();
+      const fullUrl = new URL(`/gallery/${photoId}`, window.location.origin).toString();
       await navigator.clipboard.writeText(fullUrl);
       setShareCopied(true);
       setTimeout(() => setShareCopied(false), 2000);
@@ -497,7 +552,7 @@ export default function App() {
       } else if (e.key === 'ArrowLeft') {
         handlePrevLightbox();
       } else if (e.key === 'Escape') {
-        setLightboxIndex(null);
+        closeLightbox();
       }
     };
     
@@ -516,7 +571,10 @@ export default function App() {
       timer = setInterval(() => {
         setLightboxIndex(prev => {
           if (prev === null) return null;
-          return prev === activePhotos.length - 1 ? 0 : prev + 1;
+          const next = prev === activePhotos.length - 1 ? 0 : prev + 1;
+          const nextPhoto = activePhotos[next];
+          if (nextPhoto) navigate(`/gallery/${nextPhoto.id}`, { replace: true });
+          return next;
         });
       }, 3000);
     } else {
@@ -1295,12 +1353,26 @@ export default function App() {
           description: 'Explore fine-art landscapes, automotive, portrait, and commercial photography across the Isle of Man by Jacob Crowe. Book a session, browse our prints, or view our curated highlights.',
           keywords: ['Isle of Man', 'photographer', 'fine art', 'landscape photography', 'Jacob Crowe', 'Manx Media', 'automotive photography', 'commercial camera', 'premium framing', 'prints']
         };
-      case 'gallery':
+      case 'gallery': {
+        // If a specific photo is open (/gallery/:id), use its own details —
+        // note this only affects the client-rendered <title>/meta tags for
+        // browsers; social crawlers get their own baked-in HTML from
+        // api/og-gallery.ts since they never execute this JS.
+        if (photoIdFromUrl && lightboxIndex !== null && activePhotos[lightboxIndex]) {
+          const p = activePhotos[lightboxIndex];
+          return {
+            title: `${p.title} | Manx Media`,
+            description: p.description || 'Fine-art photography by Jacob Crowe, Manx Media.',
+            keywords: ['photography', p.category, 'Isle of Man', 'Jacob Crowe', 'Manx Media'],
+            image: p.imageUrl
+          };
+        }
         return {
           title: 'Fine-Art Photography Gallery | Manx Media',
           description: 'Browse the full collection of stunning creative photographs and curated Isle of Man landscape, heritage, and automotive albums captured by Jacob Crowe.',
           keywords: ['photography gallery', 'Isle of Man prints', 'landscapes', 'wildlife gallery', 'creative frames', 'high-resolution photography', 'portfolio']
         };
+      }
       case 'about':
         return {
           title: 'Meet Jacob Crowe | About the Photographer | Manx Media',
@@ -1326,7 +1398,7 @@ export default function App() {
           keywords: ['Isle of Man', 'professional photography', 'Jacob Crowe']
         };
     }
-  }, [activeTab]);
+  }, [activeTab, photoIdFromUrl, lightboxIndex, activePhotos]);
 
   // Scroll to top on every page navigation, like a normal multi-page site.
   useEffect(() => {
@@ -1342,6 +1414,8 @@ export default function App() {
         <meta property="og:title" content={seoData.title} />
         <meta property="og:description" content={seoData.description} />
         <meta property="og:type" content="website" />
+        <meta property="og:image" content={(seoData as any).image || mainLogo} />
+        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : undefined} />
       </Helmet>
 
       {/* HEADER SECTION --- MULTI BRANDING & MODE TOGGLES */}
@@ -1616,11 +1690,7 @@ export default function App() {
                   featuredPhotos.slice(0, 3).map((photo, idx) => (
                     <div 
                       key={`${photo.id}-${idx}`}
-                      onClick={() => {
-                        setSelectedPhotoCategory('All');
-                        const indexInAll = photos.findIndex(p => p.id === photo.id);
-                        if (indexInAll !== -1) setLightboxIndex(indexInAll);
-                      }}
+                      onClick={() => openLightboxForPhoto(photo.id)}
                       className={`group cursor-pointer rounded-xl overflow-hidden border transition-all duration-300 hover:shadow-2xl hover:-translate-y-1.5 ${darkMode ? 'border-slate-900 bg-slate-900/40' : 'border-slate-200 bg-white'}`}
                       style={{ animationDelay: `${idx * 100}ms` }}
                     >
@@ -1860,7 +1930,7 @@ export default function App() {
                         <motion.div 
                           key={`${photo.id}-${index}`}
                           variants={itemVariants}
-                          onClick={() => setLightboxIndex(index)}
+                          onClick={() => openLightboxForPhoto(photo.id)}
                           className={`break-inside-avoid relative group rounded-2xl overflow-hidden border cursor-pointer font-sans transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] ${darkMode ? 'bg-slate-900/40 border-slate-900/80' : 'bg-white border-slate-200 shadow-sm'}`}
                           id={`gallery-item-${photo.id}`}
                         >
@@ -1917,17 +1987,11 @@ export default function App() {
                   id="masonry-all-container"
                 >
                   {photos.map((photo, index) => {
-                    const originalIndex = photos.findIndex(p => p.id === photo.id);
                     return (
                       <motion.div 
                         key={`${photo.id}-${index}`}
                         variants={itemVariants}
-                        onClick={() => {
-                          setSelectedPhotoCategory('All');
-                          setSelectedFolder(null);
-                          setSearchQuery('');
-                          setLightboxIndex(originalIndex);
-                        }}
+                        onClick={() => openLightboxForPhoto(photo.id)}
                         className={`break-inside-avoid relative group rounded-2xl overflow-hidden border cursor-pointer font-sans transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] ${darkMode ? 'bg-slate-900/40 border-slate-900/80' : 'bg-white border-slate-200 shadow-sm'}`}
                         id={`gallery-stream-${photo.id}`}
                       >
@@ -3638,7 +3702,7 @@ export default function App() {
       {/* =============================================================== */}
       {lightboxIndex !== null && activePhotos.length > 0 && (
         <div 
-          onClick={() => setLightboxIndex(null)}
+          onClick={closeLightbox}
           className="fixed inset-0 bg-slate-950/98 z-50 flex items-center justify-center p-4 md:p-8 animate-fadeIn"
           id="gallery-lightbox-overlay"
         >
@@ -3693,7 +3757,7 @@ export default function App() {
 
                   {/* Share Button */}
                   <button
-                    onClick={(e) => handleShareLightboxImage(e, activePhotos[lightboxIndex]?.imageUrl || '')}
+                    onClick={(e) => handleShareLightboxImage(e, activePhotos[lightboxIndex]?.id)}
                     className={`flex items-center justify-center gap-1.5 py-2 px-3 flex-1 md:flex-none rounded-lg text-[10px] font-black uppercase tracking-wider transition-all border cursor-pointer ${
                       shareCopied 
                         ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/20' 
@@ -3710,7 +3774,7 @@ export default function App() {
                   <div className="hidden md:block w-px h-6 bg-slate-800 mx-1"></div>
 
                   <button 
-                    onClick={(e) => { e.stopPropagation(); setLightboxIndex(null); }}
+                    onClick={(e) => { e.stopPropagation(); closeLightbox(); }}
                     className="flex items-center justify-center hover:text-red-500 bg-slate-900 border border-slate-800 text-slate-450 cursor-pointer p-2 md:py-2 md:px-3 rounded-lg hover:border-red-500/30 transition-all group"
                     title="Exit lightbox (Esc)"
                   >
