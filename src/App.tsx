@@ -396,6 +396,7 @@ export default function App() {
         return titleMatch || descMatch || cameraMatch || lensMatch || categoryMatch;
       });
     }
+    
 
     // Apply custom criteria sorted results (Change 1)
     const sorted = [...filtered].sort((a, b) => {
@@ -421,6 +422,18 @@ export default function App() {
 
     return sorted;
   }, [photos, selectedPhotoCategory, selectedFolder, searchQuery, sortBy]);
+
+  useEffect(() => {
+  if (!photoIdFromUrl || activePhotos.length === 0) return;
+
+  const index = activePhotos.findIndex(
+    photo => photo.id === photoIdFromUrl
+  );
+
+  if (index !== -1) {
+    setLightboxIndex(index);
+  }
+}, [photoIdFromUrl, activePhotos]);
 
   // When a /gallery/:id URL is visited directly (or shared), make sure the
   // full unfiltered photo list is active so the target photo is actually
