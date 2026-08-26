@@ -2,6 +2,17 @@
   "rewrites": [
     {
       "source": "/gallery/:id",
+      "has": [
+        {
+          "type": "header",
+          "key": "user-agent",
+          "value": ".*Discordbot.*"
+        }
+      ],
+      "destination": "/api/og-gallery?id=:id"
+    },
+    {
+      "source": "/gallery/:id",
       "destination": "/index.html"
     },
     {
