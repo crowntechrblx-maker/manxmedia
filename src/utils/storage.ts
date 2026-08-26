@@ -12,6 +12,7 @@ export interface Photo {
   imageUrl: string;
   isFeatured: boolean;
   isPublished: boolean;
+  isHero?: boolean;
   order: number;
   createdAt: string;
   updatedAt: string;

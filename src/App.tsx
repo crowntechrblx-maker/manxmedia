@@ -39,7 +39,8 @@ import {
   Download,
   Play,
   Pause,
-  Share2
+  Share2,
+  Home
 } from 'lucide-react';
 import { storage, Photo, Category, ContactSubmission } from './utils/storage';
 import { motion } from 'motion/react';
@@ -1123,6 +1124,29 @@ export default function App() {
     setPhotos(prev => prev.map(p => p.id === photo.id ? updated : p));
   };
 
+  // Only one photo can be pinned as the homepage hero at a time, so setting
+  // a new one also clears the flag on whichever photo held it before.
+  const handleToggleHero = async (photo: Photo) => {
+    if (photo.isHero) {
+      const updated: Photo = { ...photo, isHero: false };
+      await storage.savePhoto(updated);
+      setPhotos(prev => prev.map(p => p.id === photo.id ? updated : p));
+      return;
+    }
+
+    const previousHero = photos.find(p => p.isHero && p.id !== photo.id);
+    const updated: Photo = { ...photo, isHero: true };
+    await storage.savePhoto(updated);
+
+    let newPhotos = photos.map(p => p.id === photo.id ? updated : p);
+    if (previousHero) {
+      const cleared: Photo = { ...previousHero, isHero: false };
+      await storage.savePhoto(cleared);
+      newPhotos = newPhotos.map(p => p.id === cleared.id ? cleared : p);
+    }
+    setPhotos(newPhotos);
+  };
+
   const handleTogglePublished = async (photo: Photo) => {
     const updated: Photo = { ...photo, isPublished: !photo.isPublished };
     await storage.savePhoto(updated);
@@ -1303,6 +1327,22 @@ export default function App() {
   const featuredPhotos = useMemo(() => {
     return photos.filter(p => p.isFeatured);
   }, [photos]);
+
+  // The homepage hero background: whichever photo is pinned via the admin
+  // "Pin as homepage hero" control, falling back to the first photo so the
+  // hero never looks empty before one has been chosen.
+  const heroPhoto = useMemo(() => {
+    return photos.find(p => p.isHero) || photos[0] || null;
+  }, [photos]);
+
+  // Other photos from the same album as whatever's currently open in the
+  // lightbox — powers the "More From This Album" strip.
+  const relatedPhotos = useMemo(() => {
+    if (lightboxIndex === null) return [];
+    const current = activePhotos[lightboxIndex];
+    if (!current) return [];
+    return photos.filter(p => p.id !== current.id && p.category.toLowerCase() === current.category.toLowerCase());
+  }, [photos, activePhotos, lightboxIndex]);
 
   const uniqueCategoriesList = useMemo(() => {
     return ['All', ...categories.map(c => c.name)];
@@ -1593,9 +1633,9 @@ export default function App() {
             <div className="relative h-[85vh] md:h-[90vh] overflow-hidden flex items-center justify-center bg-black">
               {/* Background scale animation */}
               <div className="absolute inset-0 z-0">
-                {photos.length > 0 ? (
+                {heroPhoto ? (
                   <img 
-                    src={photos[0].imageUrl} 
+                    src={heroPhoto.imageUrl} 
                     alt="Cinematic background" 
                     className="w-full h-full object-cover opacity-60 scale-105 filter saturate-[0.8]"
                     referrerPolicy="no-referrer"
@@ -1609,7 +1649,7 @@ export default function App() {
 
               {/* Centered Hero Content */}
               <div className="relative z-10 max-w-4xl mx-auto px-6 text-center text-white flex flex-col items-center">
-                <span className="bg-blue-600/10 text-blue-450 border border-blue-500/25 dark:bg-blue-500/10 dark:text-sky-400 dark:border-sky-500/20 uppercase tracking-[0.4em] text-[10px] md:text-xs font-black py-1.5 px-4 rounded-full mb-6 select-none animate-pulse">
+                <span className="bg-amber-500/10 text-amber-500 border border-amber-500/25 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/20 uppercase tracking-[0.4em] text-[10px] md:text-xs font-black py-1.5 px-4 rounded-full mb-6 select-none animate-pulse">
                   Atmospheric Storytelling
                 </span>
                 <h2 className="text-4xl sm:text-6xl md:text-7xl font-sans font-black tracking-tight leading-none uppercase mb-6 md:mb-8 font-sans drop-shadow-md">
@@ -1630,7 +1670,7 @@ export default function App() {
                   </Link>
                   <Link 
                     to="/contact"
-                    className="border border-slate-300 hover:border-blue-500 hover:bg-slate-900/30 transition-all font-bold tracking-widest text-xs uppercase text-white py-4 px-8 rounded-lg hover:-translate-y-0.5 cursor-pointer inline-flex items-center justify-center"
+                    className="border border-slate-300 hover:border-amber-500 hover:bg-slate-900/30 transition-all font-bold tracking-widest text-xs uppercase text-white py-4 px-8 rounded-lg hover:-translate-y-0.5 cursor-pointer inline-flex items-center justify-center"
                   >
                     Get in touch
                   </Link>
@@ -1702,8 +1742,8 @@ export default function App() {
                           referrerPolicy="no-referrer"
                         />
                         {photo.isFeatured && (
-                          <div className="absolute top-4 right-4 bg-slate-950/80 backdrop-blur text-sky-450 text-[10px] font-bold tracking-wider uppercase py-1 px-3 rounded-full flex items-center gap-1 border border-sky-500/20 shadow-md">
-                            <Sparkles className="w-3 h-3 text-sky-400 fill-sky-400" />
+                          <div className="absolute top-4 right-4 bg-slate-950/80 backdrop-blur text-amber-400 text-[10px] font-bold tracking-wider uppercase py-1 px-3 rounded-full flex items-center gap-1 border border-amber-500/20 shadow-md">
+                            <Sparkles className="w-3 h-3 text-amber-400 fill-amber-400" />
                             <span>Featured</span>
                           </div>
                         )}
@@ -3371,6 +3411,11 @@ export default function App() {
                                           Featured
                                         </span>
                                       )}
+                                      {item.isHero && (
+                                        <span className="bg-amber-500/10 text-amber-600 border border-amber-500/20 text-[8px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded">
+                                          Hero
+                                        </span>
+                                      )}
                                       <span className={`text-[8px] font-black tracking-widest uppercase px-1.5 py-0.5 rounded border ${
                                         item.isPublished 
                                           ? 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20' 
@@ -3410,6 +3455,15 @@ export default function App() {
                                     <Sparkles className="w-4 h-4" />
                                   </button>
                                   
+                                  <button
+                                    type="button"
+                                    onClick={() => handleToggleHero(item)}
+                                    className={`p-2.5 rounded-lg border flex items-center justify-center transition-colors cursor-pointer ${item.isHero ? 'bg-amber-500/10 border-amber-500/30 text-amber-600 hover:bg-transparent' : darkMode ? 'border-slate-800 text-slate-500 hover:bg-slate-900' : 'border-slate-200 text-slate-600 hover:bg-slate-100'}`}
+                                    title={item.isHero ? "Currently pinned as homepage hero image" : "Pin as homepage hero image"}
+                                  >
+                                    <Home className="w-4 h-4" />
+                                  </button>
+
                                   <button
                                     type="button"
                                     onClick={() => handleDeletePhoto(item.id)}
@@ -3703,7 +3757,7 @@ export default function App() {
       {lightboxIndex !== null && activePhotos.length > 0 && (
         <div 
           onClick={closeLightbox}
-          className="fixed inset-0 bg-slate-950/98 z-50 flex items-center justify-center p-4 md:p-8 animate-fadeIn"
+          className="fixed inset-0 bg-slate-950/98 z-50 flex items-center justify-center p-4 md:p-8 animate-fadeIn overflow-y-auto"
           id="gallery-lightbox-overlay"
         >
           {/* Main Container */}
@@ -3879,6 +3933,33 @@ export default function App() {
                   <span className="text-blue-500 dark:text-sky-400 font-extrabold">✦ Curated Selection</span>
                 )}
               </div>
+
+              {/* More From This Album: related photos sharing the current category */}
+              {relatedPhotos.length > 0 && (
+                <div className="mt-4 pt-4 border-t border-slate-800" onClick={(e) => e.stopPropagation()}>
+                  <span className="block text-[10px] font-black uppercase tracking-widest text-amber-500 mb-3 px-1 text-left">
+                    More From {activePhotos[lightboxIndex]?.category}
+                  </span>
+                  <div className="flex gap-2.5 overflow-x-auto pb-1 px-1 snap-x">
+                    {relatedPhotos.map((rp) => (
+                      <button
+                        key={rp.id}
+                        type="button"
+                        onClick={() => navigate(`/gallery/${rp.id}`, { replace: true })}
+                        className="relative shrink-0 w-16 h-16 md:w-20 md:h-20 rounded-lg overflow-hidden border border-slate-800 hover:border-amber-500/60 transition-all snap-start cursor-pointer"
+                        title={rp.title}
+                      >
+                        <img
+                          src={rp.imageUrl}
+                          alt={rp.title}
+                          className="w-full h-full object-cover"
+                          referrerPolicy="no-referrer"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
           </div>
