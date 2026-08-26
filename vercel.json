@@ -20,7 +20,7 @@
       "destination": "/api/og-gallery?id=:id"
     },
     {
-      "source": "/((?!api/).*)",
+      "source": "/(.*)",
       "destination": "/index.html"
     }
   ]
