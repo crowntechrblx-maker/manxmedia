@@ -1,17 +1,5 @@
 {
-  "cleanUrls": true,
   "rewrites": [
-    {
-      "source": "/gallery/:id",
-      "has": [
-        {
-          "type": "header",
-          "key": "user-agent",
-          "value": ".*(facebookexternalhit|Facebot|Twitterbot|Slackbot|Discordbot|LinkedInBot|WhatsApp|TelegramBot|Pinterest|redditbot|Googlebot|Bingbot|SkypeUriPreview|iMessage|Applebot|vkShare|W3C_Validator|Iframely|Embedly).*"
-        }
-      ],
-      "destination": "/api/og-gallery?id=:id"
-    },
     {
       "source": "/gallery/:id",
       "destination": "/index.html"
